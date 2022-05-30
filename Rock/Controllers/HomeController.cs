@@ -8,7 +8,6 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Collections.Generic;
 using Rock_Utility;
-using Rock;
 
 namespace LeaningShop.Controllers
 {

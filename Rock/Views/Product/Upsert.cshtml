@@ -19,7 +19,7 @@
         <div class="row">
             <div class="col-8">
 
-                <div class="form-group row">
+                <div class="form-group row py-2">
                     <div class="col-4">
                         <label asp-for="Product.Name"></label>
                     </div>
@@ -29,7 +29,7 @@
                     </div>
                 </div>
 
-                <div class="form-group row">
+                <div class="form-group row py-2">
                     <div class="col-4">
                         <label asp-for="Product.Price"></label>
                     </div>
@@ -39,7 +39,7 @@
                     </div>
                 </div>
 
-                <div class="form-group row">
+                <div class="form-group row py-2">
                     <div class="col-4">
                         <label asp-for="Product.ShortDesc"></label>
                     </div>
@@ -49,7 +49,7 @@
                     </div>
                 </div>
 
-                <div class="form-group row">
+                <div class="form-group row py-2">
                     <div class="col-4">
                         <label asp-for="Product.Description"></label>
                     </div>
@@ -59,7 +59,7 @@
                     </div>
                 </div>
 
-                <div class="form-group row">
+                <div class="form-group row py-2">
                     <div class="col-4">
                         Image
                     </div>
@@ -68,31 +68,31 @@
                     </div>
                 </div>
 
-                <div class="form-group row">
+                <div class="form-group row py-2">
                     <div class="col-4">
                         <label asp-for=Product.CategoryId></label>
                     </div>
                     <div class="col-8">
-                        <select asp-for=Product.CategoryId asp-items="Model.CategorySelectList" class="form-control">
+                        <select asp-for=Product.CategoryId asp-items="Model.CategorySelectList" class="form-select">
                             <option selected disabled>Select Category</option>
                         </select>
                         <span asp-validation-for=Product.CategoryId class="text-danger"></span>
                     </div>
                 </div>
 
-                <div class="form-group row">
+                <div class="form-group row py-2">
                     <div class="col-4">
                         <label asp-for=Product.ApplicationTypeId></label>
                     </div>
                     <div class="col-8">
-                        <select asp-for=Product.ApplicationTypeId asp-items="Model.ApplicationTypeList" class="form-control">
+                        <select asp-for=Product.ApplicationTypeId asp-items="Model.ApplicationTypeList" class="form-select">
                             <option selected disabled>Select Application type</option>
                         </select>
                         <span asp-validation-for=Product.CategoryId class="text-danger"></span>
                     </div>
                 </div>
 
-                <div class="form-group row">
+                <div class="form-group row py-2">
                     <div class="col-8 offset-4 row">
                         <div class="col">
                             @if(Model.Product.Id != 0)
@@ -128,10 +128,14 @@
         <partial name="_ValidationScriptsPartial" />
     }
     <script>
-        $(document).ready(function() {
-          $('.summernote').summernote({
-              height:250,
-          });
+        //$(document).ready(function() {
+        //  $('.summernote').summernote({
+        //      height:250,
+        //  });
+        //});
+        $('#summernote').summernote({
+            tabsize: 2,
+            height: 250,
         });
         function validateInput() {
             if(document.getElementById("uploadBox".valueOf == ""){
