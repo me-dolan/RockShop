@@ -13,6 +13,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Rock_DataAccess;
+using Rock_DataAccess.Repository;
+using Rock_DataAccess.Repository.IRepository;
 using Rock_Utility;
 
 namespace Rock
@@ -51,6 +53,7 @@ namespace Rock
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
             });
+            services.AddScoped<ICategoryRepository, CategoryRepository>();
             services.AddControllersWithViews();
         }
 

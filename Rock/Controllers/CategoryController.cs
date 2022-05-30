@@ -5,22 +5,23 @@ using Rock_DataAccess;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
 using Rock_Utility;
+using Rock_DataAccess.Repository.IRepository;
 
 namespace LeaningShop.Controllers
 {
     [Authorize(Roles = WConst.AdminRole)]
     public class CategoryController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ICategoryRepository _catRepo;
 
-        public CategoryController(ApplicationDbContext context)
+        public CategoryController(ICategoryRepository catRepo)
         {
-            _context = context;
+            _catRepo = catRepo;
         }
 
         public IActionResult Index()
         {
-            IEnumerable<Category> categories = _context.Categories;
+            IEnumerable<Category> categories = _catRepo.GetAll();
             return View(categories);
         }
 
@@ -39,8 +40,8 @@ namespace LeaningShop.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Categories.Add(category);
-                _context.SaveChanges();
+                _catRepo.Add(category);
+                _catRepo.Save();
                 return RedirectToAction("Index");
             }
             return View(category);
@@ -54,7 +55,7 @@ namespace LeaningShop.Controllers
             {
                 return NotFound();
             }
-            var category = _context.Categories.Find(Id);
+            var category = _catRepo.Find(Id.GetValueOrDefault());
             if(category == null)
             {
                 return NotFound();
@@ -69,8 +70,8 @@ namespace LeaningShop.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Categories.Update(category);
-                _context.SaveChanges();
+                _catRepo.Update(category);
+                _catRepo.Save();
                 return RedirectToAction("Index");
             }
             return View(category);
@@ -83,7 +84,7 @@ namespace LeaningShop.Controllers
             {
                 return NotFound();
             }
-            var category = _context.Categories.Find(Id);
+            var category = _catRepo.Find(Id.GetValueOrDefault());
             if (category == null)
             {
                 return NotFound();
@@ -96,13 +97,13 @@ namespace LeaningShop.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(int Id)
         {
-            var category = _context.Categories.Find(Id);
+            var category = _catRepo.Find(Id);
             if(category == null)
             {
                 return NotFound();
             }
-            _context.Categories.Remove(category);
-            _context.SaveChanges();
+            _catRepo.Remove(category);
+            _catRepo.Save();
             return RedirectToAction("Index");
         }
     }
