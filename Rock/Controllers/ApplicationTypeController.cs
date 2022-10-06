@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Rock_DataAccess;
+using Rock_DataAccess.Repository.IRepository;
 using Rock_Models;
 using Rock_Utility;
 
@@ -16,17 +17,17 @@ namespace LeaningShop.Controllers
     [Authorize(Roles = WConst.AdminRole)]
     public class ApplicationTypeController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IApplicationTypeRepository _appRepo;
 
-        public ApplicationTypeController(ApplicationDbContext context)
+        public ApplicationTypeController(IApplicationTypeRepository appRepo)
         {
-            _context = context;
+            _appRepo = appRepo;
         }
 
         // GET: Index
         public IActionResult Index()
         {
-            IEnumerable<ApplicationType> applicationTypes = _context.ApplicationTypes;
+            IEnumerable<ApplicationType> applicationTypes = _appRepo.GetAll();
             return View(applicationTypes);
         }
 
@@ -43,8 +44,8 @@ namespace LeaningShop.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(applicationType);
-                _context.SaveChanges();
+                _appRepo.Add(applicationType);
+                _appRepo.Save();
                 return RedirectToAction(nameof(Index));
             }
             return View(applicationType);
@@ -58,7 +59,7 @@ namespace LeaningShop.Controllers
                 return NotFound();
             }
 
-            var applicationType = _context.ApplicationTypes.Find(id);
+            var applicationType = _appRepo.Find(id.GetValueOrDefault());
             if (applicationType == null)
             {
                 return NotFound();
@@ -73,8 +74,8 @@ namespace LeaningShop.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.ApplicationTypes.Update(applicationType);
-                _context.SaveChanges();
+                _appRepo.Update(applicationType);
+                _appRepo.Save();
                 return RedirectToAction("Index");
             }
             return View(applicationType);
@@ -88,7 +89,7 @@ namespace LeaningShop.Controllers
                 return NotFound();
             }
 
-            var applicationType = _context.ApplicationTypes.Find(id);
+            var applicationType = _appRepo.Find(id.GetValueOrDefault());
             if (applicationType == null)
             {
                 return NotFound();
@@ -100,17 +101,12 @@ namespace LeaningShop.Controllers
         // POST: Delete
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public IActionResult DeleteConfirmed(int id)
+        public IActionResult DeleteConfirmed(int? id)
         {
-            var applicationType = _context.ApplicationTypes.Find(id);
-            _context.ApplicationTypes.Remove(applicationType);
-            _context.SaveChanges();
+            var applicationType = _appRepo.Find(id.GetValueOrDefault());
+            _appRepo.Remove(applicationType);
+            _appRepo.Save();
             return RedirectToAction("Index");
-        }
-
-        private bool ApplicationTypeExists(int id)
-        {
-            return _context.ApplicationTypes.Any(e => e.Id == id);
         }
     }
 }

@@ -12,6 +12,7 @@ using Rock;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using Rock_Utility;
+using Rock_DataAccess.Repository.IRepository;
 
 namespace LeaningShop.Controllers
 {
@@ -19,20 +20,18 @@ namespace LeaningShop.Controllers
     [Authorize(Roles = WConst.AdminRole)]
     public class ProductController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IProductRepository _productRepo;
         private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public ProductController(ApplicationDbContext context, IWebHostEnvironment webHostEnvironment)
+        public ProductController(IProductRepository productRepo, IWebHostEnvironment webHostEnvironment)
         {
-            _context = context;
+            _productRepo = productRepo;
             _webHostEnvironment = webHostEnvironment;
         }
 
         public IActionResult Index()
         {
-            IEnumerable<Product> products = _context.Products
-                .Include(u=>u.Category)
-                .Include(u=>u.ApplicationType);
+            IEnumerable<Product> products = _productRepo.GetAll(includeProperties: "Category,ApplicationType");
 
             //foreach(var product in products)
             //{
@@ -58,16 +57,8 @@ namespace LeaningShop.Controllers
             ProductVM productVM = new ProductVM()
             {
                 Product = new Product(),
-                CategorySelectList = _context.Categories.Select(i => new SelectListItem
-                {
-                    Text = i.Name,
-                    Value = i.Id.ToString()
-                }),
-                ApplicationTypeList = _context.ApplicationTypes.Select(i => new SelectListItem
-                {
-                    Text = i.Name,
-                    Value = i.Id.ToString()
-                })
+                CategorySelectList = _productRepo.GetAllDropdownList(WConst.CategoryName),
+                ApplicationTypeList = _productRepo.GetAllDropdownList(WConst.ApplicationTypeName)
             };
 
             if (id == null)
@@ -76,7 +67,7 @@ namespace LeaningShop.Controllers
             }
             else
             {
-                productVM.Product = _context.Products.Find(id);
+                productVM.Product = _productRepo.Find(id.GetValueOrDefault());
                 if(productVM.Product == null)
                 {
                     return NotFound();
@@ -110,12 +101,12 @@ namespace LeaningShop.Controllers
 
                     productVM.Product.Image = fileName + extension;
 
-                    _context.Products.Add(productVM.Product);
+                    _productRepo.Add(productVM.Product);
                 }
                 else
                 {
                     //upload
-                    var objFromDb = _context.Products.AsNoTracking().FirstOrDefault(u => u.Id == productVM.Product.Id);
+                    var objFromDb = _productRepo.FirstOrDefault(u => u.Id == productVM.Product.Id, isTracking:false);
                     if(files.Count > 0)
                     {
                         string upload = webRootPath + WConst.ImagePath;
@@ -139,22 +130,14 @@ namespace LeaningShop.Controllers
                     {
                         productVM.Product.Image = objFromDb.Image;
                     }
-                    _context.Products.Update(productVM.Product);
+                    _productRepo.Update(productVM.Product);
                 }
-                productVM.CategorySelectList = _context.Categories.Select(i => new SelectListItem
-                {
-                    Text = i.Name,
-                    Value = i.Id.ToString()
-                });
-                productVM.ApplicationTypeList = _context.ApplicationTypes.Select(i => new SelectListItem
-                {
-                    Text = i.Name,
-                    Value = i.Id.ToString()
-                });
-                _context.SaveChanges();
+                _productRepo.Save();
                 return RedirectToAction("Index");
             }
-            return View();
+            productVM.CategorySelectList = _productRepo.GetAllDropdownList(WConst.CategoryName);
+            productVM.ApplicationTypeList = _productRepo.GetAllDropdownList(WConst.ApplicationTypeName);
+            return View(productVM);
         }
 
         // GET - DELETE
@@ -164,10 +147,8 @@ namespace LeaningShop.Controllers
             {
                 return NotFound();
             }
-            Product product = _context.Products
-                .Include(u => u.Category)
-                .Include(u => u.ApplicationType)
-                .FirstOrDefault(u => u.Id == Id);
+            Product product = _productRepo.FirstOrDefault(u=>u.Id == Id, includeProperties: "Category,ApplicationType");
+                
             if (product == null)
             {
                 return NotFound();
@@ -178,9 +159,9 @@ namespace LeaningShop.Controllers
         //POST - DELETE
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public IActionResult DeleteConfirmed(int Id)
+        public IActionResult DeleteConfirmed(int? Id)
         {
-            var product = _context.Products.Find(Id);
+            var product = _productRepo.Find(Id.GetValueOrDefault());
             if(product == null)
             {
                 return NotFound();
@@ -194,8 +175,8 @@ namespace LeaningShop.Controllers
             {
                 System.IO.File.Delete(oldFile);
             }
-            _context.Products.Remove(product);
-            _context.SaveChanges();
+            _productRepo.Remove(product);
+            _productRepo.Save();
             return RedirectToAction("Index");
         }
     }
